@@ -1,3 +1,4 @@
+import { ConfigService } from '../config/config.service';
 import {
   Injectable,
   BadRequestException,
@@ -10,11 +11,10 @@ import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class FileUploadService {
-  private readonly uploadDir = 'uploads';
-
-  constructor() {
+  constructor(private configService: ConfigService) {
     this.ensureUploadDirectoryExists();
   }
+  private readonly uploadDir = this.configService?.getEnvValue('UPLOAD_DIR');
 
   private async ensureUploadDirectoryExists() {
     try {

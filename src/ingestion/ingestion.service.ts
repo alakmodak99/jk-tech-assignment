@@ -2,6 +2,8 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -28,56 +30,94 @@ export class IngestionService {
     createIngestionDto: CreateIngestionDto,
     user: User,
   ): Promise<IngestionJob> {
-    const document = await this.documentRepository.findOne({
-      where: { id: createIngestionDto?.documentId } as any,
-    });
+    try {
+      const document = await this.documentRepository.findOne({
+        where: { id: createIngestionDto?.documentId } as any,
+      });
 
-    if (!document) {
-      throw new NotFoundException(
-        `Document with ID ${createIngestionDto?.documentId} not found`,
+      if (!document) {
+        throw new NotFoundException(
+          `Document with ID ${createIngestionDto?.documentId} not found`,
+        );
+      }
+
+      const job = this.ingestionRepository.create({
+        ...createIngestionDto,
+        document,
+        createdBy: user,
+      });
+
+      const savedJob = await this.ingestionRepository.save(job);
+      this.processJob(savedJob);
+      return savedJob;
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-
-    const job = this.ingestionRepository.create({
-      ...createIngestionDto,
-      document,
-      createdBy: user,
-    });
-
-    const savedJob = await this.ingestionRepository.save(job);
-    this.processJob(savedJob);
-    return savedJob;
   }
 
   async findAll(): Promise<IngestionJob[]> {
-    return this.ingestionRepository.find();
+    try {
+      return this.ingestionRepository.find();
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async findOne(id: string): Promise<IngestionJob> {
-    const job = await this.ingestionRepository.findOne({ where: { id } });
-    if (!job) {
-      throw new NotFoundException(`Ingestion job with ID ${id} not found`);
+    try {
+      const job = await this.ingestionRepository.findOne({ where: { id } });
+      if (!job)
+        throw new NotFoundException(`Ingestion job with ID ${id} not found`);
+
+      return job;
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-    return job;
   }
 
   async update(
     id: string,
     updateIngestionDto: UpdateIngestionDto,
   ): Promise<IngestionJob> {
-    const job = await this.findOne(id);
+    try {
+      const job = await this.findOne(id);
+      if (!job)
+        throw new NotFoundException(`Ingestion job with ID ${id} not found`);
 
-    if (job.status === IngestionStatus.COMPLETED) {
-      throw new BadRequestException('Cannot update completed ingestion job');
+      if (job?.status === IngestionStatus.COMPLETED)
+        throw new BadRequestException('Cannot update completed ingestion job');
+
+      Object.assign(job, updateIngestionDto);
+      return this.ingestionRepository.save(job);
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-
-    Object.assign(job, updateIngestionDto);
-    return this.ingestionRepository.save(job);
   }
 
   async remove(id: string): Promise<void> {
-    const job = await this.findOne(id);
-    await this.ingestionRepository.remove(job);
+    try {
+      const job = await this.findOne(id);
+      if (!job)
+        throw new NotFoundException(`Ingestion job with ID ${id} not found`);
+      await this.ingestionRepository.remove(job);
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   private async processJob(job: IngestionJob): Promise<void> {
