@@ -90,22 +90,21 @@ src/
 │   ├── dto/
 │   ├── guards/
 │   ├── strategies/
-│   └── tests/
+│   └── spec files
 ├── users/                 # Users module
 │   ├── dto/
 │   ├── entities/
-│   └── tests/
+│   └── spec files
 ├── documents/            # Documents module
 │   ├── dto/
 │   ├── entities/
-│   └── tests/
+│   └── spec files
 ├── ingestion/           # Ingestion module
 │   ├── dto/
 │   ├── entities/
-│   └── tests/
-└── common/              # Shared components
-    ├── filters/
-    └── interceptors/
+│   └── spec files
+test/                    # test cases
+
 ```
 
 ## Module Implementations
