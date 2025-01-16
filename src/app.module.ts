@@ -1,14 +1,23 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
-import { DocumentModule } from './document/document.module';
-import { IngestionModule } from './ingestion/ingestion.module';
 import { ConfigModule } from './config/config.module';
+import { AuthModule } from './auth/auth.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsersModule } from './users/users.module';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { ConfigService } from './config/config.service';
 
 @Module({
-  imports: [AuthModule, UsersModule, DocumentModule, IngestionModule, ConfigModule],
+  imports: [
+    ConfigModule,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useClass: ConfigService,
+    }),
+    AuthModule,
+    UsersModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
