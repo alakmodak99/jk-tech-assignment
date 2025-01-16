@@ -51,10 +51,7 @@ export class IngestionService {
       this.processJob(savedJob);
       return savedJob;
     } catch (error) {
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw error;
     }
   }
 
@@ -77,10 +74,7 @@ export class IngestionService {
 
       return job;
     } catch (error) {
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw error;
     }
   }
 
@@ -99,10 +93,7 @@ export class IngestionService {
       Object.assign(job, updateIngestionDto);
       return this.ingestionRepository.save(job);
     } catch (error) {
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw error;
     }
   }
 
@@ -113,10 +104,7 @@ export class IngestionService {
         throw new NotFoundException(`Ingestion job with ID ${id} not found`);
       await this.ingestionRepository.remove(job);
     } catch (error) {
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw error;
     }
   }
 
@@ -128,9 +116,10 @@ export class IngestionService {
       // Call Python backend for processing
       const response: any = await firstValueFrom(
         this.httpService.post('http://python-backend/process', {
-          jobId: job.id,
-          documentId: job.document.id,
-          type: job.type,
+          // python backend url to process that file
+          jobId: job?.id,
+          documentId: job?.document.id,
+          type: job?.type,
         }),
       );
 
@@ -150,7 +139,7 @@ export class IngestionService {
       job.error = error.message;
       await this.ingestionRepository.save(job);
 
-      // Notify callback URL about failure
+      // Notify callback URL about the failure
       await firstValueFrom(
         this.httpService.post(job.callbackUrl, {
           jobId: job.id,

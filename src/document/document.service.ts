@@ -37,10 +37,7 @@ export class DocumentsService {
 
       return this.documentsRepository.save(document);
     } catch (error) {
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw error;
     }
   }
 
@@ -64,10 +61,7 @@ export class DocumentsService {
         throw new NotFoundException(`Document with ID ${id} not found`);
       return document;
     } catch (error) {
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw error;
     }
   }
 
@@ -91,10 +85,7 @@ export class DocumentsService {
       Object.assign(document, updateDocumentDto);
       return this.documentsRepository.save(document);
     } catch (error) {
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw error;
     }
   }
 
@@ -107,10 +98,7 @@ export class DocumentsService {
       await this.fileUploadService.deleteFile(document?.filePath || '');
       await this.documentsRepository.remove(document);
     } catch (error) {
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw error;
     }
   }
 }

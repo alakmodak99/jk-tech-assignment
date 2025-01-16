@@ -27,10 +27,7 @@ export class UsersService {
       });
       return this.usersRepository.save(user);
     } catch (error) {
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw error;
     }
   }
 
@@ -50,7 +47,9 @@ export class UsersService {
       const user = await this.usersRepository.findOne({ where: { id } });
       if (!user) throw new NotFoundException(`User with ID ${id} not found`);
       return user;
-    } catch (error) {}
+    } catch (error) {
+      throw error;
+    }
   }
 
   async findByEmail(email: string): Promise<User> {
@@ -60,10 +59,7 @@ export class UsersService {
         throw new NotFoundException(`User with Email ${email} not found`);
       return user;
     } catch (error) {
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw error;
     }
   }
 
@@ -78,10 +74,7 @@ export class UsersService {
       const updatedUser = this.usersRepository.merge(user, updateUserDto);
       return this.usersRepository.save(updatedUser);
     } catch (error) {
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw error;
     }
   }
 
@@ -91,10 +84,7 @@ export class UsersService {
       if (!user) throw new NotFoundException(`User with ID ${id} not found`);
       await this.usersRepository.remove(user);
     } catch (error) {
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw error;
     }
   }
 }
