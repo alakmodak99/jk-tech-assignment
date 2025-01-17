@@ -128,19 +128,6 @@ The authentication module handles user authentication using JWT tokens. Configur
 })
 ```
 
-### Exception Handling and Response Transformation
-
-Implement global filters and interceptors in main.ts:
-
-```typescript
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  app.useGlobalFilters(new HttpExceptionFilter());
-  app.useGlobalInterceptors(new TransformInterceptor());
-  await app.listen(3000);
-}
-```
-
 ## API Endpoints
 
 ### Authentication
@@ -217,7 +204,7 @@ Successful responses are transformed to include metadata:
 
 ```json
 {
-  "data": {}, // Your response data
+  "data": {}, // response data
   "timestamp": "2024-01-16T10:00:00.000Z",
   "status": 200,
   "path": "/api/endpoint"
